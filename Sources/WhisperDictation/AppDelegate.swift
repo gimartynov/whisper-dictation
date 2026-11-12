@@ -14,6 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var previousApp: NSRunningApplication?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AudioRecorder.cleanupTemporaryFiles()
         setupStatusItem()
         setupPanel()
         wire()
@@ -43,9 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if !TextInserter.isTrusted() {
-            TextInserter.requestAccess()
             model.needsAccessibility = true
-            model.status = "Включите Accessibility для автовставки"
         }
 
         // Показываем панель при старте, иначе приложение выглядит «не запустилось»:
@@ -58,6 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         engine.shutdown()
+        AudioRecorder.cleanupTemporaryFiles()
     }
 
     // MARK: - UI
@@ -109,8 +109,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         model.onPaste = { [weak self] in
             guard let self else { return }
-            TextInserter.insert(self.model.text)
-            self.model.status = "Вставлено в активное приложение"
+            let ok = TextInserter.insert(self.model.text)
+            self.model.status = ok
+                ? "Вставлено в активное приложение"
+                : "Нет разрешения Accessibility — включите его в системных настройках"
         }
         model.onClear = { [weak self] in
             self?.model.text = ""
@@ -177,7 +179,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func showAbout() {
         let credits = NSMutableAttributedString(
-            string: "Диктовка голосом на Mac.\nСделал @gimartynov.\n\nРаботает на whisper.cpp (MIT) и ggml (MIT).",
+            string: "Диктовка голосом на Mac.\nСделал @gimartynov.\n\nРаботает на whisper.cpp (MIT) и ggml (MIT).\nНе связано с OpenAI; «Whisper» — открытая модель OpenAI.\nРаспознавание может ошибаться — проверяйте текст.",
             attributes: [.font: NSFont.systemFont(ofSize: 11)]
         )
         NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
@@ -289,7 +291,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         self.model.text = text
                         self.model.status = "Готово · \(text.count) символов"
                         if self.model.autoInsert {
-                            TextInserter.insert(text, activating: self.previousApp)
+                            let front = NSWorkspace.shared.frontmostApplication
+                            if let target = self.previousApp,
+                               front?.processIdentifier == target.processIdentifier,
+                               TextInserter.insert(text) {
+                                // вставлено туда, где начинали запись
+                            } else {
+                                self.model.status = "Готово · \(text.count) символов — текст в панели (приложение сменилось)"
+                            }
                         }
                     }
                 }

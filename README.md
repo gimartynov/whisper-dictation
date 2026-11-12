@@ -14,8 +14,10 @@ no audio leaves the Mac.
   recognized text, `Copy`, `Paste`, `Clear`.
 - **Auto-insert** into the previously active app via clipboard + `⌘V`.
 - **Menu bar only** — no Dock icon, no windows on launch except the panel.
-- **Local model**, downloaded once into `~/Library/Application Support/WhisperDictation/models`.
-- Russian and 90+ other languages (Whisper large-v3-turbo).
+- **Local model**, downloaded once into `~/Library/Application Support/WhisperDictation/models`
+  and verified with SHA-256 after download.
+- Russian by default. The Whisper model supports other languages, but the
+  app currently passes `-l ru` and has no language picker.
 
 ## Requirements
 
@@ -83,19 +85,34 @@ Sources/WhisperDictation/
 
 ## Privacy
 
-- Audio is written to a temporary file, sent to `127.0.0.1`, and deleted after
-  transcription.
-- No analytics, no telemetry, no network calls except the one-time model download
-  from Hugging Face.
-- Auto-insert uses the system clipboard; the previous clipboard content is restored
-  after pasting.
+- Audio is written to a temporary file, sent to the bundled whisper.cpp server on
+  `127.0.0.1` (loopback only), and deleted after transcription.
+- No analytics, no telemetry. The only network request is the one-time model
+  download from Hugging Face (which exposes your IP, as any download does).
+- Auto-insert uses the system clipboard; the previous clipboard content (all
+  items, not just text) is restored after pasting.
+- See [PRIVACY.md](PRIVACY.md).
+
+## Disclaimer
+
+Recognition may contain errors. Check the text before sending or using it.
+Do not rely on it for medical, legal, financial, or emergency purposes without
+human review.
+
+Whisper Dictation is not affiliated with, endorsed by, or sponsored by OpenAI.
+"Whisper" refers to OpenAI's open-source speech recognition model, used under
+the MIT license.
 
 ## Known limitations
 
-- Ad-hoc signing: Gatekeeper requires the “Open Anyway” step.
+- Ad-hoc signing: Gatekeeper requires the “Open Anyway” step. Download only from
+  the official Releases page and verify the published SHA-256 of the DMG.
+- On a Mac with Homebrew's `ggml`, the whisper server may load ggml backends
+  from Homebrew instead of the bundled ones. Without Homebrew the bundled
+  backends are used.
+- The model download has no resume; if interrupted it starts over.
 - A recording can be transcribed only while the model is loaded; first run takes
   a few seconds to warm up.
-- The model download has no resume and no checksum verification yet.
 - No auto-start at login.
 
 ## Third-party components
@@ -120,6 +137,9 @@ MIT — see [LICENSE](LICENSE).
 whisper.cpp, аудио никуда не отправляется.
 
 **Требования:** Apple Silicon, macOS 14+, ~1,7 ГБ на модель.
+
+**Важно:** распознавание может ошибаться — проверяйте текст перед отправкой.
+Приложение не связано с OpenAI; «Whisper» — открытая модель OpenAI под лицензией MIT.
 
 **Установка:** открыть DMG, перетащить приложение в «Программы», первый запуск
 через правый клик → «Открыть», скачать модель 1,6 ГБ, разрешить микрофон и

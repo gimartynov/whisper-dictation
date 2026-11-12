@@ -85,6 +85,17 @@ final class AudioRecorder {
         }
     }
 
+    /// Удаляет недописанные WAV после падения/завершения во время распознавания.
+    static func cleanupTemporaryFiles() {
+        let fm = FileManager.default
+        let dir = fm.temporaryDirectory
+        guard let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return }
+        for file in files where file.lastPathComponent.hasPrefix("whisper-dictation-")
+            && file.pathExtension == "wav" {
+            try? fm.removeItem(at: file)
+        }
+    }
+
     func stop() -> URL? {
         guard isRecording else { return nil }
         isRecording = false

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 /// Скачивает модель Whisper с HuggingFace в Application Support с прогрессом.
 final class ModelDownloader: NSObject, URLSessionDownloadDelegate {
@@ -52,15 +53,38 @@ final class ModelDownloader: NSObject, URLSessionDownloadDelegate {
 
             let attrs = try? fm.attributesOfItem(atPath: dest.path)
             let size = (attrs?[.size] as? Int64) ?? 0
-            guard size > 1_500_000_000 else {
+            guard size >= WhisperEngine.modelMinSize else {
+                try? fm.removeItem(at: dest)
                 throw NSError(domain: "ModelDownloader", code: 2, userInfo: [
                     NSLocalizedDescriptionKey: "Файл модели скачался не полностью (\(size) байт)"
+                ])
+            }
+
+            // Проверка целостности: подменённый или битый файл не должен попасть в работу.
+            let digest = try ModelDownloader.sha256(of: dest)
+            guard digest == WhisperEngine.modelSHA256 else {
+                try? fm.removeItem(at: dest)
+                throw NSError(domain: "ModelDownloader", code: 3, userInfo: [
+                    NSLocalizedDescriptionKey: "Контрольная сумма модели не совпала — файл удалён, попробуйте скачать снова"
                 ])
             }
             DispatchQueue.main.async { [weak self] in self?.completion?(.success(dest)) }
         } catch {
             DispatchQueue.main.async { [weak self] in self?.completion?(.failure(error)) }
         }
+    }
+
+    /// Потоковый SHA-256, чтобы не держать 1,6 ГБ в памяти.
+    static func sha256(of url: URL) throws -> String {
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var hasher = SHA256()
+        while true {
+            let data = try handle.read(upToCount: 8 * 1024 * 1024) ?? Data()
+            if data.isEmpty { break }
+            hasher.update(data: data)
+        }
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {

@@ -1,15 +1,36 @@
 Whisper Dictation
 Автор: Grigorii Martynov (@gimartynov)
 
-Приложение использует сторонние компоненты. Их лицензии сохранены
-в приложении: WhisperDictation.app/Contents/Resources/licenses/
+Приложение и его исходный код распространяются по лицензии MIT.
+Текст лицензии: LICENSE (в репозитории), LICENSE.txt (в бандле и в DMG).
 
-1. whisper.cpp — MIT License. Copyright (c) 2023-2026 The whisper.cpp authors.
-2. ggml — MIT License. Copyright (c) 2023-2026 The ggml authors.
+Сторонние компоненты
+--------------------
+1. whisper.cpp — MIT License.
+   Copyright (c) 2023-2026 The whisper.cpp authors.
+   https://github.com/ggml-org/whisper.cpp
+
+2. ggml — MIT License.
+   Copyright (c) 2023-2026 The ggml authors.
+   https://github.com/ggml-org/ggml
+   Версия библиотек в бандле: 0.26.0 (libggml.0.dylib), бэкенды 0.29.0.
+
 3. LLVM OpenMP runtime (libomp) — Apache License v2.0 with LLVM Exceptions.
    Copyright (c) The LLVM Project.
+   https://llvm.org
 
-Модель ggml-large-v3-turbo распространяется отдельно (Hugging Face,
-ggerganov/whisper.cpp) и скачивается при первом запуске.
+Модификация бинарников
+----------------------
+libwhisper, libggml*, libomp.dylib и ggml-бэкенды переупакованы и перелинкованы
+утилитой install_name_tool для работы внутри бандла (@executable_path).
+Исходный код этих библиотек не изменялся.
 
-Полные тексты лицензий: Resources/licenses/*.txt
+Модель
+------
+ggml-large-v3-turbo.bin — производная от OpenAI Whisper (openai/whisper),
+лицензия MIT, Copyright (c) 2022 OpenAI.
+Модель НЕ входит в дистрибутив: она скачивается при первом запуске с
+https://huggingface.co/ggerganov/whisper.cpp
+Модель не является продуктом OpenAI; OpenAI не связана с этим приложением.
+
+Полные тексты лицензий: Resources/licenses/*.txt внутри бандла.

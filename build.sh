@@ -16,6 +16,8 @@ cp .build/release/WhisperDictation "$APP/Contents/MacOS/"
 cp Resources/Info.plist "$APP/Contents/"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/"
 cp -R Resources/licenses "$APP/Contents/Resources/"
+cp LICENSE "$APP/Contents/Resources/LICENSE.txt"
+cp THIRD-PARTY-NOTICES.txt "$APP/Contents/Resources/"
 
 echo "→ Упаковка whisper-server и библиотек…"
 WHISPER_DIR="$APP/Contents/Resources/whisper"

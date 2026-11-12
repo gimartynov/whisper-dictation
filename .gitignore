@@ -20,3 +20,4 @@ dist/
 # Local env
 .env
 *.local
+TASK.md
