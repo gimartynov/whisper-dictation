@@ -1,0 +1,52 @@
+# Whisper Dictation
+
+> Free, offline, push-to-talk dictation for macOS with Russian speech recognition.
+> Press ⌥Space, speak, press ⌥Space again — the text is inserted into the active app.
+> Audio never leaves the Mac; transcription runs locally via whisper.cpp.
+
+## Facts
+
+- Platform: macOS 14+ (Sonoma), Apple Silicon only (M1/M2/M3/M4). Intel is not supported.
+- Language: Russian by default (`-l ru`); the underlying Whisper model is multilingual,
+  but there is no language picker in the UI yet.
+- Engine: whisper.cpp 1.9.5, statically linked, model `ggml-large-v3-turbo` (~1.6 GB),
+  Metal acceleration. No Python, no cloud, no API keys.
+- Cost: free. License: MIT. No account, no telemetry, no analytics.
+- Network: only one request — the one-time model download from Hugging Face.
+- Privacy: audio goes to a local server on 127.0.0.1 only and is deleted after
+  transcription; clipboard content is restored after auto-paste. See PRIVACY.md.
+- Signing: ad-hoc, not notarized. First launch requires right-click → Open
+  (or System Settings → Privacy & Security → Open Anyway). Verify the DMG SHA-256.
+
+## Install
+
+1. Download `WhisperDictation.dmg` from the latest release:
+   https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg
+2. Open the DMG and drag `WhisperDictation.app` to `/Applications`.
+3. First launch: right-click the app → Open → Open.
+4. The floating panel appears in the bottom-right corner.
+5. Click “Download 1.6 GB” and wait for the model to download and verify.
+6. Allow Microphone access.
+7. For automatic insertion: System Settings → Privacy & Security → Accessibility →
+   add `WhisperDictation.app` and enable it, then restart the app.
+8. Put the cursor in any text field, press ⌥Space, speak, press ⌥Space again.
+
+## Usage
+
+- ⌥Space — start/stop recording (global hotkey).
+- Auto toggle — paste the recognized text into the app that was focused before the panel.
+- Copy / Paste / Clear — manual actions in the panel.
+- Menu-bar waveform icon — show/hide the panel, About, Quit.
+
+## Links
+
+- Repository: https://github.com/gimartynov/whisper-dictation
+- Releases: https://github.com/gimartynov/whisper-dictation/releases
+- Privacy: https://github.com/gimartynov/whisper-dictation/blob/main/PRIVACY.md
+- whisper.cpp: https://github.com/ggerganov/whisper.cpp
+
+## Not affiliated
+
+Not affiliated with, endorsed by, or sponsored by OpenAI or Apple. “Whisper” refers
+to OpenAI’s open-source speech recognition model, used under the MIT license.
+Recognition may contain errors; do not rely on it for medical, legal, or emergency use.
