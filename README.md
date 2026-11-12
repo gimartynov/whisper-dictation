@@ -7,6 +7,12 @@ no audio leaves the Mac.
 
 ![demo placeholder](docs/screenshot.png)
 
+[**Download the latest release**](https://github.com/gimartynov/whisper-dictation/releases/latest) ·
+[DMG](https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg) ·
+[SHA-256](https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg.sha256)
+
+> macOS 14+, Apple Silicon. First launch: right-click the app → **Open** (the build is ad-hoc signed, not notarized).
+
 ## Features
 
 - **Global hotkey** `⌥ Space` starts and stops recording, no matter which app is focused.
