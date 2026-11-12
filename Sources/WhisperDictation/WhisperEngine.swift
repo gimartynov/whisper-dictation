@@ -50,7 +50,7 @@ final class WhisperEngine {
         return nil
     }
 
-    /// Встроенный whisper-server, иначе системный из Homebrew.
+    /// Встроенный статический whisper-server; внешних запасных вариантов нет.
     static var serverBinary: String {
         if let url = Bundle.main.url(forResource: "whisper-server", withExtension: nil, subdirectory: "whisper"),
            FileManager.default.isExecutableFile(atPath: url.path) {
@@ -71,7 +71,8 @@ final class WhisperEngine {
         return base.appendingPathComponent("Logs/WhisperDictation/server.log")
     }
 
-    init(modelPath: String = WhisperEngine.findModel()?.path ?? "") {
+    /// Путь задаётся только после проверки SHA-256 (см. AppDelegate).
+    init(modelPath: String = "") {
         self.modelPath = modelPath
     }
 

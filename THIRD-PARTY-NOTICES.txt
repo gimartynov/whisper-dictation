@@ -13,17 +13,14 @@ Whisper Dictation
 2. ggml — MIT License.
    Copyright (c) 2023-2026 The ggml authors.
    https://github.com/ggml-org/ggml
-   Версия библиотек в бандле: 0.26.0 (libggml.0.dylib), бэкенды 0.29.0.
+   Версия: 0.26.0, собрана статически внутри whisper-server.
 
-3. LLVM OpenMP runtime (libomp) — Apache License v2.0 with LLVM Exceptions.
-   Copyright (c) The LLVM Project.
-   https://llvm.org
-
-Модификация бинарников
-----------------------
-libwhisper, libggml*, libomp.dylib и ggml-бэкенды переупакованы и перелинкованы
-утилитой install_name_tool для работы внутри бандла (@executable_path).
-Исходный код этих библиотек не изменялся.
+Сборка бинарника
+----------------
+whisper-server собран из исходников whisper.cpp 1.9.5 с флагами
+GGML_METAL=ON, GGML_BLAS=OFF, GGML_OPENMP=OFF, BUILD_SHARED_LIBS=OFF.
+Все библиотеки (whisper, ggml, Metal/CPU-бэкенды) слинкованы статически
+в один исполняемый файл; внешних dylib нет. Исходный код библиотек не изменялся.
 
 Модель
 ------

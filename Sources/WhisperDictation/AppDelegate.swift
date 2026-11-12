@@ -5,6 +5,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let model = AppModel()
     private let recorder = AudioRecorder()
     private let engine = WhisperEngine()
+    /// true только после успешной проверки SHA-256 модели.
+    private var modelReady = false
     private let hotkey = HotkeyManager()
     private let downloader = ModelDownloader()
 
@@ -47,20 +49,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Проверяет SHA-256 установленной модели (с кэшем по size+mtime) и только
     /// потом запускает сервер: подменённый файл не должен попасть в работу.
     private func validateModelThenStart() {
+        modelReady = false
         guard let url = WhisperEngine.findModel() else {
             model.modelMissing = true
             model.status = "Модель не найдена — скачайте 1,6 ГБ"
-            return
-        }
-
-        let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
-        let size = (attrs?[.size] as? Int64) ?? 0
-        let mtime = (attrs?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
-        let stamp = "\(url.path)|\(size)|\(mtime)"
-        let key = "validatedModelStamp"
-
-        if UserDefaults.standard.string(forKey: key) == stamp {
-            startEngine(path: url.path)
             return
         }
 
@@ -69,14 +61,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self else { return }
             let digest = try? ModelDownloader.sha256(of: url)
             DispatchQueue.main.async {
-                if digest == WhisperEngine.modelSHA256 {
-                    UserDefaults.standard.set(stamp, forKey: key)
-                    self.startEngine(path: url.path)
-                } else {
+                guard digest == WhisperEngine.modelSHA256 else {
                     try? FileManager.default.removeItem(at: url)
+                    self.engine.shutdown()
+                    self.modelReady = false
                     self.model.modelMissing = true
                     self.model.status = "Модель повреждена — скачайте заново"
+                    return
                 }
+                // Путь в движок попадает только после успешной проверки.
+                self.engine.modelPath = url.path
+                self.modelReady = true
+                self.startEngine(path: url.path)
             }
         }
     }
@@ -266,6 +262,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             model.status = "Сначала скачайте модель 1,6 ГБ"
             return
         }
+        guard modelReady else {
+            model.status = "Модель ещё проверяется — секунду"
+            return
+        }
         switch model.phase {
         case .idle:
             startRecording()
@@ -299,6 +299,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func stopAndTranscribe() {
+        guard modelReady else {
+            _ = recorder.stop()
+            model.phase = .idle
+            model.status = "Модель не готова — проверьте статус"
+            return
+        }
         guard let url = recorder.stop() else {
             model.phase = .idle
             model.status = "Ничего не записалось"

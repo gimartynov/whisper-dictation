@@ -25,10 +25,13 @@ if [ -z "$CM" ] || [ ! -x "$CM" ]; then
 fi
 
 echo "→ Собираю статический whisper-server…"
+PREFIX_MAP="-ffile-prefix-map=$SRC=. -fmacro-prefix-map=$SRC=."
 "$CM" -B "$SRC/build-static" -DCMAKE_BUILD_TYPE=Release \
     -DGGML_METAL=ON -DGGML_BLAS=OFF -DGGML_OPENMP=OFF \
-    -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_SDL2=OFF
+    -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_SDL2=OFF \
+    -DCMAKE_C_FLAGS="$PREFIX_MAP" -DCMAKE_CXX_FLAGS="$PREFIX_MAP"
 "$CM" --build "$SRC/build-static" --target whisper-server --parallel 8
 
+strip -x "$SRC/build-static/bin/whisper-server" 2>/dev/null || true
 echo "✓ Готово: $SRC/build-static/bin/whisper-server"
 otool -L "$SRC/build-static/bin/whisper-server"

@@ -116,8 +116,7 @@ the MIT license.
 ## Third-party components
 
 - whisper.cpp — MIT
-- ggml — MIT
-- LLVM OpenMP runtime — Apache 2.0 with LLVM Exceptions
+- ggml — MIT (statically linked into whisper-server)
 
 Full texts are in `Resources/licenses/` and inside the app bundle. See
 `THIRD-PARTY-NOTICES.txt`.
@@ -143,7 +142,7 @@ whisper.cpp, аудио никуда не отправляется.
 через правый клик → «Открыть», скачать модель 1,6 ГБ, разрешить микрофон и
 «Универсальный доступ» (для автовставки). Подробнее — в `Установка.txt` внутри DMG.
 
-**Сборка:** `./build.sh`, затем `./make-dmg.sh` (нужен Homebrew с whisper-cpp).
+**Сборка:** `scripts/build-whisper.sh` (нужен cmake), затем `./build.sh` и `./make-dmg.sh`.
 
-**Лицензия:** MIT, сторонние компоненты — whisper.cpp и ggml (MIT), libomp
-(Apache 2.0 с LLVM-исключением).
+**Лицензия:** MIT, сторонние компоненты — whisper.cpp и ggml (MIT), собраны
+статически в один бинарник.
