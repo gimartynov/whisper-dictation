@@ -46,8 +46,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Проверяет SHA-256 установленной модели (с кэшем по size+mtime) и только
-    /// потом запускает сервер: подменённый файл не должен попасть в работу.
+    /// Всегда проверяет SHA-256 установленной модели и только потом запускает
+    /// сервер: подменённый или битый файл не должен попасть в работу.
     private func validateModelThenStart() {
         modelReady = false
         guard let url = WhisperEngine.findModel() else {
@@ -169,15 +169,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self else { return }
             self.model.downloadProgress = nil
             switch result {
-            case .success(let url):
-                self.engine.modelPath = url.path
-                self.model.status = "Модель скачана, запускаю…"
-                Task {
-                    let ready = await self.engine.ensureRunning()
-                    await MainActor.run {
-                        self.model.status = ready ? "Модель загружена" : "Не удалось запустить whisper-server"
-                    }
-                }
+            case .success:
+                // ModelDownloader уже проверил SHA-256; прогоняем штатную
+                // валидацию, чтобы выставить modelReady и запустить сервер.
+                self.model.status = "Модель скачана, проверяю…"
+                self.validateModelThenStart()
             case .failure(let error):
                 self.model.modelMissing = true
                 self.model.status = "Ошибка загрузки: \(error.localizedDescription)"
