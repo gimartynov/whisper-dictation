@@ -15,6 +15,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         AudioRecorder.cleanupTemporaryFiles()
+        // Старый лог предыдущих версий (лежал в world-readable /tmp).
+        try? FileManager.default.removeItem(atPath: "/tmp/whisper-dictation-server.log")
         setupStatusItem()
         setupPanel()
         wire()
@@ -28,20 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         hotkey.register()
 
-        Task { [weak self] in
-            guard let self else { return }
-            if WhisperEngine.findModel() == nil {
-                await MainActor.run {
-                    self.model.modelMissing = true
-                    self.model.status = "Модель не найдена — скачайте 1,6 ГБ"
-                }
-                return
-            }
-            let ready = await self.engine.ensureRunning()
-            await MainActor.run {
-                self.model.status = ready ? "Модель загружена" : "Не удалось запустить whisper-server"
-            }
-        }
+        validateModelThenStart()
 
         if !TextInserter.isTrusted() {
             model.needsAccessibility = true
@@ -52,6 +41,54 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             self?.positionPanel()
             self?.panel?.orderFrontRegardless()
+        }
+    }
+
+    /// Проверяет SHA-256 установленной модели (с кэшем по size+mtime) и только
+    /// потом запускает сервер: подменённый файл не должен попасть в работу.
+    private func validateModelThenStart() {
+        guard let url = WhisperEngine.findModel() else {
+            model.modelMissing = true
+            model.status = "Модель не найдена — скачайте 1,6 ГБ"
+            return
+        }
+
+        let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
+        let size = (attrs?[.size] as? Int64) ?? 0
+        let mtime = (attrs?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
+        let stamp = "\(url.path)|\(size)|\(mtime)"
+        let key = "validatedModelStamp"
+
+        if UserDefaults.standard.string(forKey: key) == stamp {
+            startEngine(path: url.path)
+            return
+        }
+
+        model.status = "Проверяю модель…"
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            let digest = try? ModelDownloader.sha256(of: url)
+            DispatchQueue.main.async {
+                if digest == WhisperEngine.modelSHA256 {
+                    UserDefaults.standard.set(stamp, forKey: key)
+                    self.startEngine(path: url.path)
+                } else {
+                    try? FileManager.default.removeItem(at: url)
+                    self.model.modelMissing = true
+                    self.model.status = "Модель повреждена — скачайте заново"
+                }
+            }
+        }
+    }
+
+    private func startEngine(path: String) {
+        engine.modelPath = path
+        Task { [weak self] in
+            guard let self else { return }
+            let ready = await self.engine.ensureRunning()
+            await MainActor.run {
+                self.model.status = ready ? "Модель загружена" : "Не удалось запустить whisper-server"
+            }
         }
     }
 
@@ -275,7 +312,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard await self.engine.ensureRunning() else {
                 await MainActor.run {
                     self.model.phase = .idle
-                    self.model.status = "whisper-server не запустился, смотрите /tmp/whisper-dictation-server.log"
+                    self.model.status = "whisper-server не запустился — лог: ~/Library/Logs/WhisperDictation/server.log"
                 }
                 try? FileManager.default.removeItem(at: url)
                 return
@@ -296,6 +333,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                front?.processIdentifier == target.processIdentifier,
                                TextInserter.insert(text) {
                                 // вставлено туда, где начинали запись
+                            } else if !TextInserter.isTrusted() {
+                                self.model.needsAccessibility = true
+                                self.model.status = "Готово · \(text.count) символов — нужен доступ Accessibility для вставки"
                             } else {
                                 self.model.status = "Готово · \(text.count) символов — текст в панели (приложение сменилось)"
                             }

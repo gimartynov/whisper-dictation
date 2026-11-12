@@ -56,7 +56,8 @@ final class WhisperEngine {
            FileManager.default.isExecutableFile(atPath: url.path) {
             return url.path
         }
-        return "/opt/homebrew/bin/whisper-server"
+        // Только свой бинарник: никаких внешних whisper-server.
+        return ""
     }
 
     var modelPath: String

@@ -33,4 +33,4 @@ ggml-large-v3-turbo.bin — производная от OpenAI Whisper (openai/w
 https://huggingface.co/ggerganov/whisper.cpp
 Модель не является продуктом OpenAI; OpenAI не связана с этим приложением.
 
-Полные тексты лицензий: Resources/licenses/*.txt внутри бандла.
+Полные тексты лицензий: WhisperDictation.app/Contents/Resources/licenses/*.txt

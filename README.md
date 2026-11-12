@@ -45,16 +45,17 @@ Usage: put the cursor where you want text, press `⌥ Space`, speak, press
 
 ## Build from source
 
-macOS 14+, Xcode command line tools, Homebrew with `whisper-cpp`, `ggml`, `libomp`.
+macOS 14+, Xcode command line tools, and `cmake` (only to build `whisper-server`).
 
 ```bash
-./build.sh      # builds build/WhisperDictation.app
-./make-dmg.sh   # builds build/WhisperDictation.dmg
+scripts/build-whisper.sh   # builds whisper.cpp 1.9.5 statically (Metal + CPU built in)
+./build.sh                 # builds build/WhisperDictation.app
+./make-dmg.sh              # builds build/WhisperDictation.dmg + .sha256
 ```
 
-The app is ad-hoc signed (no Apple Developer certificate). The bundle embeds
-`whisper-server`, its dylibs and ggml backends, so the target Mac does not need
-Homebrew.
+The app is ad-hoc signed (no Apple Developer certificate). The bundle contains a
+single static `whisper-server` that links only Apple system frameworks — no
+Homebrew, no external dylibs, no downloaded ggml backends.
 
 During development you can point the app at an existing model file instead of
 downloading it:
@@ -107,9 +108,6 @@ the MIT license.
 
 - Ad-hoc signing: Gatekeeper requires the “Open Anyway” step. Download only from
   the official Releases page and verify the published SHA-256 of the DMG.
-- On a Mac with Homebrew's `ggml`, the whisper server may load ggml backends
-  from Homebrew instead of the bundled ones. Without Homebrew the bundled
-  backends are used.
 - The model download has no resume; if interrupted it starts over.
 - A recording can be transcribed only while the model is loaded; first run takes
   a few seconds to warm up.

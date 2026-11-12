@@ -15,6 +15,11 @@ telemetry, or advertising.
 - **Recognized text.** Shown in the panel, copied to the system clipboard, and
   pasted into the app you were using if auto-insert is enabled. The text is not
   stored on disk by the app.
+- **Clipboard.** Around a paste, the previous clipboard contents (all items and
+  types, including images) are saved and restored afterwards. They are not sent
+  anywhere and not logged.
+- **Accessibility permission.** Used only to send ⌘V into the app you were
+  dictating into. The app cannot read your screen or keystrokes.
 - **Settings.** The auto-insert toggle is kept in memory for the session.
 - **Logs.** `~/Library/Logs/WhisperDictation/server.log` contains whisper.cpp
   diagnostics (model path, timings, backend names). It does not contain

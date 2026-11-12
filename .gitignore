@@ -21,3 +21,4 @@ dist/
 .env
 *.local
 TASK.md
+.vendor/
