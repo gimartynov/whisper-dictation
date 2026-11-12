@@ -1,0 +1,15 @@
+Whisper Dictation
+Автор: Grigorii Martynov (@gimartynov)
+
+Приложение использует сторонние компоненты. Их лицензии сохранены
+в приложении: WhisperDictation.app/Contents/Resources/licenses/
+
+1. whisper.cpp — MIT License. Copyright (c) 2023-2026 The whisper.cpp authors.
+2. ggml — MIT License. Copyright (c) 2023-2026 The ggml authors.
+3. LLVM OpenMP runtime (libomp) — Apache License v2.0 with LLVM Exceptions.
+   Copyright (c) The LLVM Project.
+
+Модель ggml-large-v3-turbo распространяется отдельно (Hugging Face,
+ggerganov/whisper.cpp) и скачивается при первом запуске.
+
+Полные тексты лицензий: Resources/licenses/*.txt

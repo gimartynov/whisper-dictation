@@ -1,0 +1,22 @@
+# Build artifacts
+.build/
+build/
+dist/
+
+# Distributives and caches
+*.dmg
+*.zip
+*.xcarchive
+
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Local env
+.env
+*.local
