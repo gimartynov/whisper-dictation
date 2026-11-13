@@ -85,6 +85,14 @@ final class WhisperEngine {
     func ensureRunning() async -> Bool {
         if let process, process.isRunning, await ping() { return true }
 
+        // Intel-маки с проблемным Metal иногда роняют whisper-server на старте.
+        // Если сервер не поднялся с GPU, пробуем ещё раз без Metal (CPU).
+        if await startAndWait(noGPU: false) { return true }
+        return await startAndWait(noGPU: true)
+    }
+
+    private func startAndWait(noGPU: Bool) async -> Bool {
+
         process?.terminate()
         process = nil
 
@@ -95,13 +103,15 @@ final class WhisperEngine {
 
         let p = Process()
         p.executableURL = URL(fileURLWithPath: Self.serverBinary)
-        p.arguments = [
+        var args = [
             "-m", modelPath,
             "--host", "127.0.0.1",
             "--port", "\(port)",
             "-t", "6",
             "-l", "ru"
         ]
+        if noGPU { args.append("-ng") }
+        p.arguments = args
 
         let logURL = Self.logURL
         let logDir = logURL.deletingLastPathComponent()

@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 rm -rf dist
 mkdir -p dist
 cp -R build/WhisperDictation.app dist/
+ln -sfn /Applications dist/Applications
 cp "Resources/Установка.txt" dist/
 cp THIRD-PARTY-NOTICES.txt dist/
 cp LICENSE dist/LICENSE.txt
