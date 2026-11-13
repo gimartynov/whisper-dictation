@@ -58,8 +58,12 @@ no audio leaves the Mac.
 > **not** “Code → Download ZIP” — the ZIP contains source code and cannot be launched.
 
 1. Download `WhisperDictation.dmg` from Releases.
-2. Open it and drag `WhisperDictation.app` to `/Applications`.
-3. First launch: right-click the app in Finder → **Open** → **Open**.
+2. Open it.
+3. **Easiest:** double-click `Установить.command` — it copies the app to
+   `/Applications`, removes the quarantine flag and launches it. (The DMG's
+   own “downloaded from the internet” prompt is the only confirmation.)
+4. Manual alternative: drag `WhisperDictation.app` onto the `Applications`
+   shortcut, then right-click the app → **Open** → **Open**.
    If the “Open” button is missing (macOS 15+), use
    **System Settings → Privacy & Security → Open Anyway**.
 4. The panel appears in the bottom-right corner. If not, click the waveform

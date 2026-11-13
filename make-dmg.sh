@@ -9,6 +9,8 @@ mkdir -p dist
 cp -R build/WhisperDictation.app dist/
 ln -sfn /Applications dist/Applications
 cp "Resources/Установка.txt" dist/
+cp "Resources/Установить.command" dist/
+chmod +x dist/"Установить.command"
 cp THIRD-PARTY-NOTICES.txt dist/
 cp LICENSE dist/LICENSE.txt
 cp PRIVACY.md dist/PRIVACY.md
