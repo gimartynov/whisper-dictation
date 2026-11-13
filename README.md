@@ -59,10 +59,14 @@ no audio leaves the Mac.
 
 1. Download `WhisperDictation.dmg` from Releases.
 2. Open it.
-3. **Easiest:** double-click `Установить.command` — it copies the app to
-   `/Applications`, removes the quarantine flag and launches it. (The DMG's
-   own “downloaded from the internet” prompt is the only confirmation.)
-4. Manual alternative: drag `WhisperDictation.app` onto the `Applications`
+3. **Easiest:** right-click `Установить.command` → **Open** → **Open**.
+   Gatekeeper blocks downloaded scripts too, so the first launch needs that
+   one extra confirmation. The script copies the app to `/Applications`,
+   removes the quarantine flag and launches it.
+4. If right-click → Open is not offered (Ventura): open Terminal, type `bash `
+   and drag `Установить.command` into the Terminal window, press Return —
+   no dialogs at all.
+5. Manual alternative: drag `WhisperDictation.app` onto the `Applications`
    shortcut, then right-click the app → **Open** → **Open**.
    If the “Open” button is missing (macOS 15+), use
    **System Settings → Privacy & Security → Open Anyway**.
