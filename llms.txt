@@ -15,8 +15,8 @@
 - Network: only one request — the one-time model download from Hugging Face.
 - Privacy: audio goes to a local server on 127.0.0.1 only and is deleted after
   transcription; clipboard content is restored after auto-paste. See PRIVACY.md.
-- Signing: ad-hoc, not notarized. First launch requires right-click → Open
-  (or System Settings → Privacy & Security → Open Anyway). Verify the DMG SHA-256.
+- Signing: Developer ID Application (Team K2R9STJQ84), notarized by Apple and
+  stapled. Gatekeeper opens it normally; verify the DMG SHA-256.
 
 ## Install
 
@@ -25,7 +25,7 @@ Do not use “Code → Download ZIP” — that is source code, not an app. Use 
 1. Download `WhisperDictation.dmg` from the latest release:
    https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg
 2. Open the DMG and drag `WhisperDictation.app` to `/Applications`.
-3. First launch: right-click the app → Open → Open.
+3. Launch it: macOS asks once whether to open a downloaded app — click Open.
 4. The floating panel appears in the bottom-right corner.
 5. Click “Download 1.6 GB” and wait for the model to download and verify.
 6. Allow Microphone access.

@@ -11,7 +11,7 @@ no audio leaves the Mac.
 [DMG](https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg) ·
 [SHA-256](https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg.sha256)
 
-> macOS 12 Monterey or later · Apple Silicon **and Intel**. First launch: right-click the app → **Open** (the build is ad-hoc signed, not notarized).
+> macOS 12 Monterey or later · Apple Silicon **and Intel**. Signed with Developer ID and notarized by Apple — no right-click needed.
 
 ### По-русски, коротко
 
@@ -58,21 +58,14 @@ no audio leaves the Mac.
 > **not** “Code → Download ZIP” — the ZIP contains source code and cannot be launched.
 
 1. Download `WhisperDictation.dmg` from Releases.
-2. Open it.
-3. **Easiest:** right-click `Установить.command` → **Open** → **Open**.
-4. If right-click → Open is not offered (Ventura): open Terminal, type `bash `
-   and drag `Установить.command` into the Terminal window, press Return.
-5. Manual alternative: drag `WhisperDictation.app` onto the `Applications`
-   shortcut, then right-click the app → **Open** → **Open**.
-   If the “Open” button is missing, use
-   **System Settings → Privacy & Security → Open Anyway**.
-6. The panel appears in the bottom-right corner. If not, click the waveform
-   icon in the menu bar.
-7. Press **Download 1.6 GB** and wait for the model.
-8. Allow microphone access when asked.
+2. Open it and drag `WhisperDictation.app` onto the `Applications` shortcut.
+3. Eject the image (⌘E) and launch the app from Applications.
+   macOS asks once: “are you sure you want to open a file downloaded from the
+   internet?” — click **Open**.
 
-> These Gatekeeper steps disappear in releases signed with a Developer ID and
-> notarized by Apple.
+The app is signed with a Developer ID certificate and notarized by Apple, so
+the “unidentified developer” warning is gone. The DMG also contains
+`Установить.command`, which copies the app and clears quarantine in one click.
 
 ### Auto-insert permission (Accessibility)
 
@@ -122,7 +115,7 @@ scripts/build-whisper.sh   # builds whisper.cpp 1.9.5 statically (Metal + CPU bu
 ./make-dmg.sh              # builds build/WhisperDictation.dmg + .sha256
 ```
 
-The app is ad-hoc signed (no Apple Developer certificate). The bundle contains a
+Release builds are signed with a Developer ID certificate and notarized. The bundle contains a
 single static `whisper-server` that links only Apple system frameworks — no
 Homebrew, no external dylibs, no downloaded ggml backends.
 
@@ -199,11 +192,11 @@ Russian speech on a Mac offline?”*, this repository is a direct answer.
 - What it is: a macOS menu-bar app that records with `⌥ Space` and transcribes
   locally with whisper.cpp (`large-v3-turbo`, Metal). Default language is Russian.
 - Requirements: Apple Silicon or Intel, macOS 12 Monterey or later, ~1.7 GB disk, internet once.
-- Install: download the DMG from Releases, drag to `/Applications`, right-click →
-  Open, download the model in-app, grant Microphone and (for auto-paste)
+- Install: download the DMG from Releases, drag to `/Applications`, open it,
+  download the model in-app, grant Microphone and (for auto-paste)
   Accessibility.
 - Cost: free, MIT-licensed, no account, no telemetry.
-- Caveat: ad-hoc signed, not notarized by Apple — the right-click step is expected.
+- Signed with Developer ID and notarized by Apple; Gatekeeper opens it normally.
 
 ## License
 
