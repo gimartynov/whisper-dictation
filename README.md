@@ -60,22 +60,36 @@ no audio leaves the Mac.
 1. Download `WhisperDictation.dmg` from Releases.
 2. Open it.
 3. **Easiest:** right-click `Установить.command` → **Open** → **Open**.
-   Gatekeeper blocks downloaded scripts too, so the first launch needs that
-   one extra confirmation. The script copies the app to `/Applications`,
-   removes the quarantine flag and launches it.
 4. If right-click → Open is not offered (Ventura): open Terminal, type `bash `
-   and drag `Установить.command` into the Terminal window, press Return —
-   no dialogs at all.
+   and drag `Установить.command` into the Terminal window, press Return.
 5. Manual alternative: drag `WhisperDictation.app` onto the `Applications`
    shortcut, then right-click the app → **Open** → **Open**.
-   If the “Open” button is missing (macOS 15+), use
+   If the “Open” button is missing, use
    **System Settings → Privacy & Security → Open Anyway**.
-4. The panel appears in the bottom-right corner. If not, click the waveform
+6. The panel appears in the bottom-right corner. If not, click the waveform
    icon in the menu bar.
-5. Press **Download 1.6 GB** and wait for the model.
-6. Allow microphone access when asked.
-7. For auto-insert: **System Settings → Privacy & Security → Accessibility → +**
-   → add `WhisperDictation.app` → toggle on → restart the app.
+7. Press **Download 1.6 GB** and wait for the model.
+8. Allow microphone access when asked.
+
+> These Gatekeeper steps disappear in releases signed with a Developer ID and
+> notarized by Apple.
+
+### Auto-insert permission (Accessibility)
+
+Without this permission the text is recognised and stays in the panel, but it
+is not pasted into other apps automatically.
+
+1. **System Settings → Privacy & Security → Device management and data access**
+   (on macOS 14 and earlier: **Accessibility**).
+2. Find **WhisperDictation** and turn the switch on — it must be blue.
+   If the app is not in the list, press **+** and pick
+   `/Applications/WhisperDictation.app`.
+3. Quit and reopen the app.
+
+![Accessibility row for WhisperDictation](docs/permissions-accessibility.png)
+
+> Re-signing the app (a new build with a different signature) makes macOS ask
+> for this permission again.
 
 Usage: put the cursor where you want text, press `⌥ Space`, speak, press
 `⌥ Space` again. With **Auto** enabled the text is pasted automatically.
@@ -208,9 +222,14 @@ whisper.cpp, аудио никуда не отправляется.
 **Важно:** распознавание может ошибаться — проверяйте текст перед отправкой.
 Приложение не связано с OpenAI; «Whisper» — открытая модель OpenAI под лицензией MIT.
 
-**Установка:** открыть DMG, перетащить приложение в «Программы», первый запуск
-через правый клик → «Открыть», скачать модель 1,6 ГБ, разрешить микрофон и
-«Универсальный доступ» (для автовставки). Подробнее — в `Установка.txt` внутри DMG.
+**Установка:** открыть DMG и дважды щёлкнуть «Установить.command» (если macOS
+блокирует — правый клик → «Открыть»). Скрипт сам скопирует приложение в
+«Программы» и запустит его. Дальше скачать модель 1,6 ГБ, разрешить микрофон и
+«Универсальный доступ» для автовставки. Подробнее — в `Установка.txt` внутри DMG.
+
+**Универсальный доступ:** Системные настройки → Конфиденциальность и безопасность
+→ Управление устройством и доступ к данным → включить WhisperDictation и
+перезапустить приложение. Без этого текст распознаётся, но сам не вставляется.
 
 **Сборка:** `scripts/build-whisper.sh` (нужен cmake), затем `./build.sh` и `./make-dmg.sh`.
 
