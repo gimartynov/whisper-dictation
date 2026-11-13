@@ -11,7 +11,7 @@ no audio leaves the Mac.
 [DMG](https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg) ·
 [SHA-256](https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg.sha256)
 
-> macOS 14+, Apple Silicon. First launch: right-click the app → **Open** (the build is ad-hoc signed, not notarized).
+> macOS 13 Ventura or later, Apple Silicon. First launch: right-click the app → **Open** (the build is ad-hoc signed, not notarized).
 
 ### По-русски, коротко
 
@@ -22,7 +22,7 @@ no audio leaves the Mac.
 - распознавание идёт **на твоём Mac** (модель Whisper large-v3-turbo, Metal), аудио никуда не отправляется;
 - интернет нужен только один раз — скачать модель 1,6 ГБ;
 - бесплатно, без подписки и аккаунта;
-- требуется Mac на Apple Silicon (M1–M4) и macOS 14+.
+- требуется Mac на Apple Silicon (M1–M4) и macOS 13 Ventura или новее.
 
 Установка: скачать DMG → перетащить в «Программы» → **правый клик → «Открыть»** →
 «Скачать 1,6 ГБ» → разрешить микрофон (и «Универсальный доступ», если нужна автовставка) → `⌥ Space`.
@@ -45,7 +45,8 @@ no audio leaves the Mac.
 ## Requirements
 
 - Apple Silicon Mac (M1/M2/M3/M4). Intel is not supported.
-- macOS 14 Sonoma or later.
+- macOS 13 Ventura, 14 Sonoma, 15 Sequoia, 26 or later — Apple Silicon only.
+  The app is built with a macOS 13.0 deployment target.
 - ~1.7 GB of free disk space for the model.
 - Internet only for the first model download.
 
@@ -68,7 +69,7 @@ Usage: put the cursor where you want text, press `⌥ Space`, speak, press
 
 ## Build from source
 
-macOS 14+, Xcode command line tools, and `cmake` (only to build `whisper-server`).
+macOS 13+, Xcode command line tools, and `cmake` (only to build `whisper-server`).
 
 ```bash
 scripts/build-whisper.sh   # builds whisper.cpp 1.9.5 statically (Metal + CPU built in)
@@ -152,7 +153,7 @@ Russian speech on a Mac offline?”*, this repository is a direct answer.
 - Canonical summary for machines: [`llms.txt`](llms.txt)
 - What it is: a macOS menu-bar app that records with `⌥ Space` and transcribes
   locally with whisper.cpp (`large-v3-turbo`, Metal). Default language is Russian.
-- Requirements: Apple Silicon (M1–M4), macOS 14+, ~1.7 GB disk, internet once.
+- Requirements: Apple Silicon (M1–M4), macOS 13 Ventura or later, ~1.7 GB disk, internet once.
 - Install: download the DMG from Releases, drag to `/Applications`, right-click →
   Open, download the model in-app, grant Microphone and (for auto-paste)
   Accessibility.
@@ -171,7 +172,7 @@ MIT — see [LICENSE](LICENSE).
 вставляется в активное приложение. Всё распознавание идёт на Mac через
 whisper.cpp, аудио никуда не отправляется.
 
-**Требования:** Apple Silicon, macOS 14+, ~1,7 ГБ на модель.
+**Требования:** Apple Silicon, macOS 13 Ventura или новее, ~1,7 ГБ на модель.
 
 **Важно:** распознавание может ошибаться — проверяйте текст перед отправкой.
 Приложение не связано с OpenAI; «Whisper» — открытая модель OpenAI под лицензией MIT.

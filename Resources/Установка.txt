@@ -7,7 +7,7 @@ Whisper Dictation — диктовка голосом на Mac
 ЧТО НУЖНО
 ---------
 • Mac на Apple Silicon (M1/M2/M3/M4). Intel не поддерживается.
-• macOS 14 Sonoma или новее.
+• macOS 13 Ventura, 14 Sonoma, 15 Sequoia или новее (Apple Silicon).
 • ~1,7 ГБ свободного места — под модель.
 • Интернет — только чтобы один раз скачать модель.
 
