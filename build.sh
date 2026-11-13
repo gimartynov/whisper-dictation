@@ -44,7 +44,26 @@ if otool -L "$WHISPER_DIR/whisper-server" | grep -q "/opt/homebrew"; then
     exit 1
 fi
 
-codesign --force --sign - "$WHISPER_DIR/whisper-server" >/dev/null 2>&1
+# Подпись: Developer ID (если есть сертификат) или ad-hoc.
+# Developer ID можно задать явно: CODESIGN_IDENTITY="Developer ID Application: ..."
+IDENTITY="${CODESIGN_IDENTITY:-}"
+if [ -z "$IDENTITY" ]; then
+    IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null \
+        | grep -o '"Developer ID Application: [^"]*"' | head -1 | tr -d '"' || true)
+fi
 
-codesign --force --deep --sign - --identifier com.grigorii.whisperdictation --requirements '=designated => identifier "com.grigorii.whisperdictation"' "$APP"
+if [ -n "$IDENTITY" ]; then
+    echo "→ Подпись Developer ID: $IDENTITY"
+    codesign --force --options runtime --timestamp --sign "$IDENTITY" \
+        "$WHISPER_DIR/whisper-server" >/dev/null
+    codesign --force --options runtime --timestamp --sign "$IDENTITY" \
+        --identifier com.grigorii.whisperdictation "$APP"
+else
+    echo "→ Подпись ad-hoc (Developer ID не найден)"
+    codesign --force --sign - "$WHISPER_DIR/whisper-server" >/dev/null 2>&1
+    codesign --force --deep --sign - --identifier com.grigorii.whisperdictation \
+        --requirements '=designated => identifier "com.grigorii.whisperdictation"' "$APP"
+fi
+
+codesign --verify --deep --strict "$APP"
 echo "✓ Готово: $(pwd)/$APP"

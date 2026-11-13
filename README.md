@@ -80,6 +80,24 @@ no audio leaves the Mac.
 Usage: put the cursor where you want text, press `⌥ Space`, speak, press
 `⌥ Space` again. With **Auto** enabled the text is pasted automatically.
 
+## Signing and notarization
+
+`build.sh` signs with **Developer ID Application** when that certificate is in
+the login keychain (otherwise it falls back to ad-hoc). The hardened runtime is
+enabled automatically; the bundled `whisper-server` is signed first, then the app.
+
+To notarize a release:
+
+```bash
+xcrun notarytool store-credentials whisper-dictation \
+  --apple-id "you@example.com" --team-id YOURTEAMID
+./build.sh && ./make-dmg.sh
+./scripts/notarize.sh
+```
+
+`scripts/notarize.sh` submits the DMG, waits for the result, staples the ticket
+to both the app and the DMG and checks Gatekeeper with `spctl`.
+
 ## Build from source
 
 macOS 12+, Xcode command line tools, and `cmake` (only to build `whisper-server`).
