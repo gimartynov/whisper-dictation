@@ -6,13 +6,17 @@ Whisper Dictation — диктовка голосом на Mac
 
 ЧТО НУЖНО
 ---------
-• Mac на Apple Silicon (M1/M2/M3/M4). Intel не поддерживается.
-• macOS 13 Ventura, 14 Sonoma, 15 Sequoia или новее (Apple Silicon).
+• Mac на Apple Silicon (M1–M4) или Intel.
+• macOS 12 Monterey или новее.
 • ~1,7 ГБ свободного места — под модель.
 • Интернет — только чтобы один раз скачать модель.
 
 УСТАНОВКА
 ---------
+ВАЖНО: скачивайте файл WhisperDictation.dmg со страницы Releases
+(github.com/gimartynov/whisper-dictation/releases/latest),
+а НЕ «Code → Download ZIP» — в ZIP лежат исходники, они не запускаются.
+
 1. Дважды щёлкните файл WhisperDictation.dmg — откроется окно с приложением.
 
 2. Перетащите WhisperDictation.app в папку «Программы» (Applications),

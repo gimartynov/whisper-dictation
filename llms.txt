@@ -6,7 +6,7 @@
 
 ## Facts
 
-- Platform: macOS 13 Ventura or later (13, 14 Sonoma, 15 Sequoia, 26+); Apple Silicon only (M1/M2/M3/M4). Intel is not supported.
+- Platform: macOS 12 Monterey or later (12, 13 Ventura, 14 Sonoma, 15 Sequoia, 26+). Universal binary: Apple Silicon (M1–M4) and Intel (x86_64).
 - Language: Russian by default (`-l ru`); the underlying Whisper model is multilingual,
   but there is no language picker in the UI yet.
 - Engine: whisper.cpp 1.9.5, statically linked, model `ggml-large-v3-turbo` (~1.6 GB),
@@ -19,6 +19,8 @@
   (or System Settings → Privacy & Security → Open Anyway). Verify the DMG SHA-256.
 
 ## Install
+
+Do not use “Code → Download ZIP” — that is source code, not an app. Use the DMG below.
 
 1. Download `WhisperDictation.dmg` from the latest release:
    https://github.com/gimartynov/whisper-dictation/releases/latest/download/WhisperDictation.dmg

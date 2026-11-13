@@ -27,9 +27,10 @@ fi
 echo "→ Собираю статический whisper-server…"
 PREFIX_MAP="-ffile-prefix-map=$SRC=. -fmacro-prefix-map=$SRC=."
 "$CM" -S "$SRC" -B "$SRC/build-static" -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
     -DCMAKE_OSX_SYSROOT="$(xcrun --show-sdk-path)" \
-    -DGGML_METAL=ON -DGGML_BLAS=OFF -DGGML_OPENMP=OFF \
+    -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+    -DGGML_METAL=ON -DGGML_NATIVE=OFF -DGGML_BLAS=OFF -DGGML_OPENMP=OFF \
     -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_SDL2=OFF \
     -DCMAKE_C_FLAGS="$PREFIX_MAP" -DCMAKE_CXX_FLAGS="$PREFIX_MAP"
 "$CM" --build "$SRC/build-static" --target whisper-server --parallel 8
