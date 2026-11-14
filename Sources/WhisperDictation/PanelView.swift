@@ -14,7 +14,10 @@ struct PanelView: View {
 
     private var title: String {
         switch model.phase {
-        case .idle: return "Готов к записи"
+        case .idle:
+            if model.downloadProgress != nil { return "Скачиваю модель…" }
+            if model.modelMissing { return "Нужна модель" }
+            return "Готов к записи"
         case .recording: return "Идёт запись…"
         case .transcribing: return "Распознаю…"
         }

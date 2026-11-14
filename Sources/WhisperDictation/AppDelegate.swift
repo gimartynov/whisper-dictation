@@ -303,7 +303,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func toggleRecording() {
         if model.modelMissing || model.downloadProgress != nil {
-            model.status = "Сначала скачайте модель 1,6 ГБ"
+            model.status = "Сначала скачайте модель \(model.selectedModel.sizeLabel)"
             return
         }
         guard modelReady else {
