@@ -86,13 +86,23 @@ final class WhisperEngine {
 
     /// Запускает сервер только на свободном порту и никогда не доверяет
     /// чужому процессу, который уже слушает порт.
+    /// На 4-ядерном Intel шесть потоков только мешают: whisper.cpp всё равно
+    /// упирается в ядра, а лишние потоки добавляют конкуренцию.
+    static let threadCount = max(2, min(6, ProcessInfo.processInfo.activeProcessorCount))
+
     func ensureRunning() async -> Bool {
         if let process, process.isRunning, await ping() { return true }
 
-        // Intel-маки с проблемным Metal иногда роняют whisper-server на старте.
-        // Если сервер не поднялся с GPU, пробуем ещё раз без Metal (CPU).
+        #if arch(x86_64)
+        // Intel: Metal-бэкенд whisper.cpp на старых GPU может компилировать
+        // шейдеры минутами и вешать распознавание. Работаем только на CPU —
+        // это предсказуемо, хоть и медленнее.
+        return await startAndWait(noGPU: true)
+        #else
+        // Apple Silicon: сначала Metal, при падении — CPU.
         if await startAndWait(noGPU: false) { return true }
         return await startAndWait(noGPU: true)
+        #endif
     }
 
     private func startAndWait(noGPU: Bool) async -> Bool {
@@ -111,7 +121,7 @@ final class WhisperEngine {
             "-m", modelPath,
             "--host", "127.0.0.1",
             "--port", "\(port)",
-            "-t", "6",
+            "-t", "\(Self.threadCount)",
             "-l", "ru"
         ]
         if noGPU { args.append("-ng") }
@@ -148,7 +158,8 @@ final class WhisperEngine {
             return false
         }
 
-        for _ in 0..<240 {
+        // На Intel загрузка модели может занять больше двух минут.
+        for _ in 0..<360 {
             if await ping() { return true }
             if !p.isRunning { return false }
             try? await Task.sleep(nanoseconds: 500_000_000)
@@ -195,6 +206,18 @@ final class WhisperEngine {
     }
 
     func transcribe(wav: URL, language: String = "ru") async throws -> String {
+        do {
+            return try await transcribeOnce(wav: wav, language: language)
+        } catch let error as URLError where error.code == .timedOut {
+            // Медленный CPU не уложился в лимит: перезапускаем сервер в CPU-режиме
+            // и даём один повтор — на Intel Metal мог «залипнуть».
+            shutdown()
+            guard await startAndWait(noGPU: true) else { throw error }
+            return try await transcribeOnce(wav: wav, language: language)
+        }
+    }
+
+    private func transcribeOnce(wav: URL, language: String) async throws -> String {
         let audio = try Data(contentsOf: wav)
         let boundary = "----WhisperDictation\(UUID().uuidString)"
         var body = Data()
@@ -224,7 +247,9 @@ final class WhisperEngine {
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.httpBody = body
-        request.timeoutInterval = 180
+        // Очень медленный CPU (Intel, 4 ядра) может считать 10 секунд речи
+        // дольше минуты; лимит должен быть с большим запасом.
+        request.timeoutInterval = 900
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {

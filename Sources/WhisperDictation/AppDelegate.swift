@@ -335,7 +335,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model.phase = .transcribing
         model.status = "Распознаю…"
 
+        // На Intel распознавание может идти минуту: показываем, что процесс
+        // жив, а не «зависло».
+        let started = Date()
+        let ticker = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                guard let self else { return }
+                let seconds = Int(Date().timeIntervalSince(started))
+                await MainActor.run {
+                    guard self.model.phase == .transcribing else { return }
+                    self.model.status = "Распознаю… \(seconds) с"
+                }
+            }
+        }
+
         Task { [weak self] in
+            defer { ticker.cancel() }
             guard let self else { return }
             guard await self.engine.ensureRunning() else {
                 await MainActor.run {
@@ -372,9 +388,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             } catch {
                 try? FileManager.default.removeItem(at: url)
+                let message: String
+                if let urlError = error as? URLError, urlError.code == .timedOut {
+                    message = "Сервер не ответил за 15 минут. Перезапустите приложение и попробуйте снова"
+                } else {
+                    message = error.localizedDescription
+                }
                 await MainActor.run {
                     self.model.phase = .idle
-                    self.model.status = "Ошибка: \(error.localizedDescription)"
+                    self.model.status = "Ошибка: \(message)"
                 }
             }
         }
