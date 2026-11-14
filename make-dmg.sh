@@ -19,6 +19,8 @@ rm -f build/WhisperDictation.dmg
 chmod 0644 dist/*.txt dist/*.md 2>/dev/null || true
 hdiutil create -volname "Whisper Dictation" -srcfolder dist -ov -format UDZO build/WhisperDictation.dmg >/dev/null
 
+# Предварительная сумма. После notarize.sh DMG меняется (stapler), поэтому
+# публиковать нужно ту сумму, которую пересчитывает scripts/notarize.sh.
 shasum -a 256 build/WhisperDictation.dmg | awk '{print $1"  WhisperDictation.dmg"}' > build/WhisperDictation.dmg.sha256
 
 echo "✓ DMG: $(pwd)/build/WhisperDictation.dmg"

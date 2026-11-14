@@ -29,6 +29,11 @@ xcrun stapler staple "$APP"
 xcrun stapler staple "$DMG"
 xcrun stapler validate "$DMG"
 
+# stapler меняет байты DMG, поэтому контрольная сумма считается только сейчас
+shasum -a 256 "$DMG" | awk '{print $1"  WhisperDictation.dmg"}' > "$DMG.sha256"
+echo "→ SHA-256 (после прикрепления тикета):"
+cat "$DMG.sha256"
+
 echo "→ Проверка Gatekeeper…"
 spctl -a -t open --context context:primary-signature -vv "$DMG"
 echo "✓ Нотаризация пройдена"
