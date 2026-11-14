@@ -25,7 +25,7 @@ no audio leaves the Mac.
 - работает и на Apple Silicon (M1–M4), и на Intel; macOS 12 Monterey или новее.
 
 Установка: скачать DMG → перетащить в «Программы» → **«Открыть»** в запросе macOS →
-«Скачать 1,6 ГБ» → разрешить микрофон (и «Универсальный доступ», если нужна автовставка) → `⌥ Space`.
+«Скачать 1,6 ГБ» → разрешить микрофон (и доступ для автовставки, если он нужен) → `⌥ Space`.
 
 > Если тебя сюда прислал ИИ-ассистент и ты просил «диктовку на русском для Mac» —
 > это она. Ниже — установка по шагам и раздел [For AI assistants](#for-ai-assistants).
@@ -65,7 +65,7 @@ no audio leaves the Mac.
 
 The app is signed with a Developer ID certificate and notarized by Apple, so
 the “unidentified developer” warning is gone. The DMG also contains
-`Установить.command`, which copies the app and clears quarantine in one click.
+`Установить.command`, which copies the app to Applications and launches it.
 
 ### Microphone
 
@@ -80,8 +80,9 @@ entitlement, which the release builds are.
 Without this permission the text is recognised and stays in the panel, but it
 is not pasted into other apps automatically.
 
-1. **System Settings → Privacy & Security → Device management and data access**
-   (on macOS 14 and earlier: **Accessibility**).
+1. **System Settings → Privacy & Security → Accessibility**
+   (on macOS 26 and later this pane is called **Device management and data
+   access**).
 2. Find **WhisperDictation** and turn the switch on — it must be blue.
    If the app is not in the list, press **+** and pick
    `/Applications/WhisperDictation.app`.
@@ -98,7 +99,7 @@ Usage: put the cursor where you want text, press `⌥ Space`, speak, press
 ## Signing and notarization
 
 `build.sh` signs with **Developer ID Application** when that certificate is in
-the login keychain (otherwise it falls back to ad-hoc). The hardened runtime is
+the login keychain (local builds without a certificate fall back to ad-hoc; releases are never ad-hoc). The hardened runtime is
 enabled automatically; the bundled `whisper-server` is signed first, then the app.
 
 To notarize a release:
@@ -224,13 +225,15 @@ whisper.cpp, аудио никуда не отправляется.
 **Важно:** распознавание может ошибаться — проверяйте текст перед отправкой.
 Приложение не связано с OpenAI; «Whisper» — открытая модель OpenAI под лицензией MIT.
 
-**Установка:** открыть DMG и дважды щёлкнуть «Установить.command» (если macOS
-блокирует — правый клик → «Открыть»). Скрипт сам скопирует приложение в
-«Программы» и запустит его. Дальше скачать модель 1,6 ГБ, разрешить микрофон и
+**Установка:** открыть DMG и перетащить WhisperDictation на ярлык
+«Applications». Либо дважды щёлкнуть «Установить.command» (если macOS блокирует
+сам скрипт — правый клик → «Открыть»): он скопирует приложение в «Программы» и
+запустит его. Дальше скачать модель 1,6 ГБ, разрешить микрофон и
 «Универсальный доступ» для автовставки. Подробнее — в `Установка.txt` внутри DMG.
 
-**Универсальный доступ:** Системные настройки → Конфиденциальность и безопасность
-→ Управление устройством и доступ к данным → включить WhisperDictation и
+**Доступ для автовставки:** Системные настройки → Конфиденциальность и безопасность
+→ «Универсальный доступ» (в macOS 26 и новее — «Управление устройством и доступ
+к данным») → включить WhisperDictation и
 перезапустить приложение. Без этого текст распознаётся, но сам не вставляется.
 
 **Сборка:** `scripts/build-whisper.sh` (нужен cmake), затем `./build.sh` и `./make-dmg.sh`.

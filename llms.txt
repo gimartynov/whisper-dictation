@@ -30,7 +30,8 @@ Do not use “Code → Download ZIP” — that is source code, not an app. Use 
 4. The floating panel appears in the bottom-right corner.
 5. Click “Download 1.6 GB” and wait for the model to download and verify.
 6. Allow Microphone access.
-7. For automatic insertion: System Settings → Privacy & Security → Accessibility →
+7. For automatic insertion: System Settings → Privacy & Security → Accessibility
+   (macOS 26+: "Device management and data access") →
    add `WhisperDictation.app` and enable it, then restart the app.
 8. Put the cursor in any text field, press ⌥Space, speak, press ⌥Space again.
 
