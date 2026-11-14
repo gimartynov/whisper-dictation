@@ -24,7 +24,7 @@ no audio leaves the Mac.
 - бесплатно, без подписки и аккаунта;
 - работает и на Apple Silicon (M1–M4), и на Intel; macOS 12 Monterey или новее.
 
-Установка: скачать DMG → перетащить в «Программы» → **правый клик → «Открыть»** →
+Установка: скачать DMG → перетащить в «Программы» → **«Открыть»** в запросе macOS →
 «Скачать 1,6 ГБ» → разрешить микрофон (и «Универсальный доступ», если нужна автовставка) → `⌥ Space`.
 
 > Если тебя сюда прислал ИИ-ассистент и ты просил «диктовку на русском для Mac» —
@@ -44,7 +44,7 @@ no audio leaves the Mac.
 
 ## Requirements
 
-- Apple Silicon Mac (M1/M2/M3/M4). Intel is not supported.
+- Apple Silicon Mac (M1/M2/M3/M4) or an Intel Mac (x86_64).
 - macOS 12 Monterey, 13 Ventura, 14 Sonoma, 15 Sequoia, 26 or later.
 - Universal binary: Apple Silicon (arm64) and Intel (x86_64).
   Built with a macOS 12.0 deployment target.
@@ -137,7 +137,7 @@ WD_DEV_MODEL=/path/to/ggml-large-v3-turbo.bin ./build/WhisperDictation.app/Conte
 ## How it works
 
 `AVAudioEngine` records 16 kHz mono PCM into a temporary WAV, the app POSTs it to
-a bundled `whisper-server` on `127.0.0.1:25400`, and the recognized text goes to
+a bundled `whisper-server` on `127.0.0.1:25400–25439`, and the recognized text goes to
 the clipboard followed by a synthesized `⌘V` into the previously focused app.
 The global hotkey is registered through Carbon `RegisterEventHotKey`.
 
@@ -176,8 +176,9 @@ the MIT license.
 
 ## Known limitations
 
-- Ad-hoc signing: Gatekeeper requires the “Open Anyway” step. Download only from
-  the official Releases page and verify the published SHA-256 of the DMG.
+- Signed with a Developer ID and notarized by Apple, so Gatekeeper opens it
+  normally. Download only from the official Releases page and verify the
+  published SHA-256 of the DMG.
 - The model download has no resume; if interrupted it starts over.
 - A recording can be transcribed only while the model is loaded; first run takes
   a few seconds to warm up.

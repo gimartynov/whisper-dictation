@@ -1,6 +1,7 @@
 #!/bin/bash
-# Устанавливает Whisper Dictation в «Программы» и снимает карантин macOS,
-# чтобы приложение запускалось обычным двойным щелчком.
+# Устанавливает Whisper Dictation в «Программы».
+# Приложение подписано Developer ID и нотаризовано, поэтому карантин снимать
+# не нужно: Gatekeeper сам проверит подпись при первом запуске.
 set -e
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -28,9 +29,6 @@ if ! rm -rf "$DEST" 2>/dev/null || ! ditto "$SRC" "$DEST" 2>/dev/null; then
     rm -rf "$DEST"
     ditto "$SRC" "$DEST"
 fi
-
-echo "→ Снимаю карантин macOS…"
-xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true
 
 echo "→ Запускаю…"
 killall WhisperDictation 2>/dev/null || true

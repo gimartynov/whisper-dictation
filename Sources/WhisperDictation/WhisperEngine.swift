@@ -31,9 +31,13 @@ final class WhisperEngine {
     /// Для разработки: путь к уже скачанному файлу модели через переменную
     /// окружения WD_DEV_MODEL. В обычном запуске не используется.
     static var devModel: URL? {
+        #if DEBUG
         guard let path = ProcessInfo.processInfo.environment["WD_DEV_MODEL"],
               !path.isEmpty else { return nil }
         return URL(fileURLWithPath: path)
+        #else
+        return nil
+        #endif
     }
 
     /// Первый подходящий путь к модели или nil.
@@ -119,9 +123,17 @@ final class WhisperEngine {
             at: logDir, withIntermediateDirectories: true,
             attributes: [.posixPermissions: 0o700]
         )
+        // createDirectory не меняет права у уже существующего каталога,
+        // поэтому выставляем их явно при каждом старте.
+        try? FileManager.default.setAttributes(
+            [.posixPermissions: 0o700], ofItemAtPath: logDir.path
+        )
         FileManager.default.createFile(
             atPath: logURL.path, contents: nil,
             attributes: [.posixPermissions: 0o600]
+        )
+        try? FileManager.default.setAttributes(
+            [.posixPermissions: 0o600], ofItemAtPath: logURL.path
         )
         if let handle = try? FileHandle(forWritingTo: logURL) {
             try? handle.truncate(atOffset: 0)

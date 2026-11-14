@@ -140,6 +140,9 @@ final class AudioRecorder {
 
         do {
             try data.write(to: url)
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o600], ofItemAtPath: url.path
+            )
             return url
         } catch {
             return nil

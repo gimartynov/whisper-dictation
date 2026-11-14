@@ -2,7 +2,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-./build.sh
+if [ "${SKIP_BUILD:-0}" != "1" ]; then
+    ./build.sh
+fi
 
 rm -rf dist
 mkdir -p dist

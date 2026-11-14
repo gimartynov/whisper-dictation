@@ -15,8 +15,9 @@
 - Network: only one request — the one-time model download from Hugging Face.
 - Privacy: audio goes to a local server on 127.0.0.1 only and is deleted after
   transcription; clipboard content is restored after auto-paste. See PRIVACY.md.
-- Signing: Developer ID Application (Team K2R9STJQ84), notarized by Apple and
-  stapled. Gatekeeper opens it normally; verify the DMG SHA-256.
+- Signing: Developer ID Application (Team K2R9STJQ84). Both the app inside the
+  DMG and the DMG itself are notarized by Apple and stapled. Gatekeeper opens it
+  normally; verify the DMG SHA-256.
 
 ## Install
 

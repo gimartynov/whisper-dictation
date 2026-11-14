@@ -7,7 +7,7 @@ Whisper Dictation
 Сторонние компоненты
 --------------------
 1. whisper.cpp — MIT License.
-   Copyright (c) 2023-2026 The whisper.cpp authors.
+   Copyright (c) 2023-2026 The ggml authors.
    https://github.com/ggml-org/whisper.cpp
 
 2. ggml — MIT License.

@@ -14,8 +14,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var isWarmingUp = false
     private var previousApp: NSRunningApplication?
+    /// Держим источники сигналов, иначе whisper-server переживёт killall/краш.
+    private var signalSources: [DispatchSourceSignal] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        installSignalHandlers()
         AudioRecorder.cleanupTemporaryFiles()
         // Старый лог предыдущих версий (лежал в world-readable /tmp).
         try? FileManager.default.removeItem(atPath: "/tmp/whisper-dictation-server.log")
@@ -46,6 +49,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    /// SIGTERM/SIGINT от killall и SIGKILL-подобных сценариев: без этого
+    /// дочерний whisper-server оставался жить после завершения приложения.
+    private func installSignalHandlers() {
+        for sig in [SIGTERM, SIGINT, SIGHUP] {
+            signal(sig, SIG_IGN)
+            let source = DispatchSource.makeSignalSource(signal: sig, queue: .main)
+            source.setEventHandler { [weak self] in
+                self?.engine.shutdown()
+                AudioRecorder.cleanupTemporaryFiles()
+                exit(0)
+            }
+            source.resume()
+            signalSources.append(source)
+        }
+    }
+
     /// Всегда проверяет SHA-256 установленной модели и только потом запускает
     /// сервер: подменённый или битый файл не должен попасть в работу.
     private func validateModelThenStart() {
@@ -59,8 +78,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model.status = "Проверяю модель…"
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self else { return }
-            let digest = try? ModelDownloader.sha256(of: url)
+            // Ошибку чтения не путаем с подменой: один повтор, и только
+            // подтверждённое несовпадение удаляет файл.
+            var digest = try? ModelDownloader.sha256(of: url)
+            if digest == nil { digest = try? ModelDownloader.sha256(of: url) }
             DispatchQueue.main.async {
+                guard let digest else {
+                    self.model.status = "Не удалось прочитать модель — проверьте файл"
+                    return
+                }
                 guard digest == WhisperEngine.modelSHA256 else {
                     try? FileManager.default.removeItem(at: url)
                     self.engine.shutdown()

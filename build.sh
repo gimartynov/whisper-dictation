@@ -15,6 +15,18 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 BIN=".build/out/Products/Release/WhisperDictation"
 [ -f "$BIN" ] || BIN=".build/release/WhisperDictation"
 cp "$BIN" "$APP/Contents/MacOS/"
+BINPATH="$APP/Contents/MacOS/WhisperDictation"
+
+# В релизном бинарнике не должно быть rpath на toolchain Xcode:
+# он не нужен на машине пользователя и выдаёт путь сборки.
+while IFS= read -r rp; do
+    [ -n "$rp" ] || continue
+    case "$rp" in
+        *Xcode.app*|*xctoolchain*)
+            install_name_tool -delete_rpath "$rp" "$BINPATH" 2>/dev/null || true
+            ;;
+    esac
+done < <(otool -l "$BINPATH" | awk '/cmd LC_RPATH/{getline; getline; print $2}')
 cp Resources/Info.plist "$APP/Contents/"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/"
 cp -R Resources/licenses "$APP/Contents/Resources/"
@@ -50,6 +62,11 @@ IDENTITY="${CODESIGN_IDENTITY:-}"
 if [ -z "$IDENTITY" ]; then
     IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null \
         | grep -o '"Developer ID Application: [^"]*"' | head -1 | tr -d '"' || true)
+fi
+
+if [ -n "${REQUIRE_DEVELOPER_ID:-}" ] && [ -z "$IDENTITY" ]; then
+    echo "✗ REQUIRE_DEVELOPER_ID=1, но сертификат Developer ID Application не найден."
+    exit 1
 fi
 
 if [ -n "$IDENTITY" ]; then
