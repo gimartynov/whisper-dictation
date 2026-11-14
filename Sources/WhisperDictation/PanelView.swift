@@ -99,7 +99,7 @@ struct PanelView: View {
 
             if let progress = model.downloadProgress {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("Скачиваю модель: \(Int(progress * 100))% из 1,6 ГБ")
+                    Text("Скачиваю \(model.selectedModel.title) (\(model.selectedModel.sizeLabel)): \(Int(progress * 100))%")
                         .font(.system(size: 11))
                     ProgressView(value: progress)
                         .progressViewStyle(.linear)
@@ -111,10 +111,10 @@ struct PanelView: View {
                     Image(systemName: "arrow.down.circle.fill")
                         .foregroundStyle(.blue)
                         .font(.system(size: 12))
-                    Text("Модель не найдена")
+                    Text("Модель \(model.selectedModel.title) не скачана")
                         .font(.system(size: 11))
                     Spacer()
-                    Button("Скачать 1,6 ГБ") { model.onDownloadModel?() }
+                    Button("Скачать \(model.selectedModel.sizeLabel)") { model.onDownloadModel?() }
                         .controlSize(.small)
                 }
                 .padding(8)
@@ -146,6 +146,25 @@ struct PanelView: View {
                     .toggleStyle(.switch)
                     .controlSize(.mini)
                     .help("Автоматически вставлять распознанный текст в активное приложение")
+            }
+
+            HStack(spacing: 8) {
+                Text("Модель")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Picker("", selection: Binding(
+                    get: { model.selectedModelID },
+                    set: { model.onSelectModel?($0) }
+                )) {
+                    ForEach(ModelCatalog.all) { item in
+                        Text(item.title).tag(item.id)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .controlSize(.small)
+                .labelsHidden()
+                .help(model.selectedModel.note)
+                Spacer()
             }
 
             HStack {

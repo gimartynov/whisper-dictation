@@ -37,6 +37,9 @@ no audio leaves the Mac.
   recognized text, `Copy`, `Paste`, `Clear`.
 - **Auto-insert** into the previously active app via clipboard + `⌘V`.
 - **Menu bar only** — no Dock icon, no windows on launch except the panel.
+- **Two models, picked automatically by hardware** (see [Models](#models)):
+  `large-v3-turbo` on Apple Silicon, `small` on Intel Macs. You can switch
+  anytime in the panel; the app offers to download the missing one.
 - **Local model**, downloaded once into `~/Library/Application Support/WhisperDictation/models`
   and verified with SHA-256 after download.
 - Russian by default. The Whisper model supports other languages, but the
@@ -113,6 +116,26 @@ xcrun notarytool store-credentials whisper-dictation \
 
 `scripts/notarize.sh` submits the DMG, waits for the result, staples the ticket
 to both the app and the DMG and checks Gatekeeper with `spctl`.
+
+## Models
+
+| Model | Size | Default on | Notes |
+| --- | --- | --- | --- |
+| `large-v3-turbo` | 1.6 GB | Apple Silicon | Best accuracy; needs a strong CPU/GPU |
+| `small` | 466 MB | Intel Macs | 3-4x faster on a 4-core Intel i5, slightly less accurate on rare words |
+
+The app recommends a model by architecture: `x86_64` gets `small`, `arm64`
+gets `large-v3-turbo`. The choice is saved and can be switched in the panel
+row **Модель / Model**; if the selected model is missing, the app shows a
+download button with its size. Only one model is needed at a time — the other
+one is not downloaded unless you switch.
+
+SHA-256 checksums:
+
+```
+turbo  1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69
+small  1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b
+```
 
 ## Build from source
 

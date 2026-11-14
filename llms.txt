@@ -9,8 +9,13 @@
 - Platform: macOS 12 Monterey or later (12, 13 Ventura, 14 Sonoma, 15 Sequoia, 26+). Universal binary: Apple Silicon (M1–M4) and Intel (x86_64).
 - Language: Russian by default (`-l ru`); the underlying Whisper model is multilingual,
   but there is no language picker in the UI yet.
-- Engine: whisper.cpp 1.9.5, statically linked, model `ggml-large-v3-turbo` (~1.6 GB),
-  Metal acceleration. No Python, no cloud, no API keys.
+- Engine: whisper.cpp 1.9.5, statically linked. Two models, chosen by hardware:
+  `ggml-large-v3-turbo` (~1.6 GB) on Apple Silicon, `ggml-small` (~466 MB) on Intel.
+  Switchable in the panel (Turbo / Small); the missing model is offered as a download.
+- Model checksums (SHA-256):
+  turbo 1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69
+  small 1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b
+- Engine backend: Metal on Apple Silicon, CPU (`-ng`) on Intel. No Python, no cloud, no API keys.
 - Cost: free. License: MIT. No account, no telemetry, no analytics.
 - Network: only one request — the one-time model download from Hugging Face.
 - Privacy: audio goes to a local server on 127.0.0.1 only and is deleted after
@@ -28,7 +33,8 @@ Do not use “Code → Download ZIP” — that is source code, not an app. Use 
 2. Open the DMG and drag `WhisperDictation.app` to `/Applications`.
 3. Launch it: macOS asks once whether to open a downloaded app — click Open.
 4. The floating panel appears in the bottom-right corner.
-5. Click “Download 1.6 GB” and wait for the model to download and verify.
+5. Click “Download …” — the app picks the model for the machine (1.6 GB on Apple
+   Silicon, 466 MB on Intel) and verifies its SHA-256 after download.
 6. Allow Microphone access.
 7. For automatic insertion: System Settings → Privacy & Security → Accessibility
    (macOS 26+: "Device management and data access") →

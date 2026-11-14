@@ -14,12 +14,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var isWarmingUp = false
     private var previousApp: NSRunningApplication?
+    static let modelDefaultsKey = "WhisperDictation.selectedModel"
+
     /// Держим источники сигналов, иначе whisper-server переживёт killall/краш.
     private var signalSources: [DispatchSourceSignal] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         installSignalHandlers()
         AudioRecorder.cleanupTemporaryFiles()
+        if let saved = UserDefaults.standard.string(forKey: Self.modelDefaultsKey),
+           ModelCatalog.all.contains(where: { $0.id == saved }) {
+            model.selectedModelID = saved
+        }
         // Старый лог предыдущих версий (лежал в world-readable /tmp).
         try? FileManager.default.removeItem(atPath: "/tmp/whisper-dictation-server.log")
         setupStatusItem()
@@ -69,11 +75,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// сервер: подменённый или битый файл не должен попасть в работу.
     private func validateModelThenStart() {
         modelReady = false
-        guard let url = WhisperEngine.findModel() else {
+        let spec = model.selectedModel
+        guard let url = WhisperEngine.findModel(spec) else {
             model.modelMissing = true
-            model.status = "Модель не найдена — скачайте 1,6 ГБ"
+            model.status = "Модель \(spec.title) не скачана — \(spec.sizeLabel)"
             return
         }
+        model.modelMissing = false
 
         model.status = "Проверяю модель…"
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -87,7 +95,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     self.model.status = "Не удалось прочитать модель — проверьте файл"
                     return
                 }
-                guard digest == WhisperEngine.modelSHA256 else {
+                guard digest == spec.sha256 else {
                     try? FileManager.default.removeItem(at: url)
                     self.engine.shutdown()
                     self.modelReady = false
@@ -180,6 +188,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.panel?.orderOut(nil)
         }
         model.onDownloadModel = { [weak self] in self?.downloadModel() }
+        model.onSelectModel = { [weak self] id in self?.selectModel(id) }
+    }
+
+    /// Переключение модели: сохраняем выбор, гасим сервер и проверяем файл.
+    private func selectModel(_ id: String) {
+        guard id != model.selectedModelID, model.downloadProgress == nil else { return }
+        UserDefaults.standard.set(id, forKey: Self.modelDefaultsKey)
+        model.selectedModelID = id
+        model.modelMissing = false
+        modelReady = false
+        engine.shutdown()
+        model.status = "Переключаю модель…"
+        validateModelThenStart()
     }
 
     private func downloadModel() {
@@ -188,7 +209,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model.downloadProgress = 0
         model.status = "Скачиваю модель…"
 
-        downloader.download(progress: { [weak self] value in
+        let spec = model.selectedModel
+        downloader.download(model: spec, progress: { [weak self] value in
             self?.model.downloadProgress = value
             self?.model.status = "Скачиваю модель: \(Int(value * 100))%"
         }, completion: { [weak self] result in

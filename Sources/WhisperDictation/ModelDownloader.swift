@@ -7,9 +7,12 @@ final class ModelDownloader: NSObject, URLSessionDownloadDelegate {
     private var task: URLSessionDownloadTask?
     private var progressHandler: ((Double) -> Void)?
     private var completion: ((Result<URL, Error>) -> Void)?
+    private var model: WhisperModel = ModelCatalog.turbo
 
-    func download(progress: @escaping (Double) -> Void,
+    func download(model: WhisperModel,
+                  progress: @escaping (Double) -> Void,
                   completion: @escaping (Result<URL, Error>) -> Void) {
+        self.model = model
         self.progressHandler = progress
         self.completion = completion
 
@@ -19,7 +22,7 @@ final class ModelDownloader: NSObject, URLSessionDownloadDelegate {
         let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         self.session = session
 
-        let task = session.downloadTask(with: WhisperEngine.modelURL)
+        let task = session.downloadTask(with: model.url)
         self.task = task
         task.resume()
     }
@@ -45,7 +48,7 @@ final class ModelDownloader: NSObject, URLSessionDownloadDelegate {
         let fm = FileManager.default
         do {
             try fm.createDirectory(at: WhisperEngine.modelsDir, withIntermediateDirectories: true)
-            let dest = WhisperEngine.installedModel
+            let dest = WhisperEngine.modelsDir.appendingPathComponent(model.fileName)
             if fm.fileExists(atPath: dest.path) {
                 try fm.removeItem(at: dest)
             }
@@ -53,7 +56,7 @@ final class ModelDownloader: NSObject, URLSessionDownloadDelegate {
 
             let attrs = try? fm.attributesOfItem(atPath: dest.path)
             let size = (attrs?[.size] as? Int64) ?? 0
-            guard size >= WhisperEngine.modelMinSize else {
+            guard size >= model.minSize else {
                 try? fm.removeItem(at: dest)
                 throw NSError(domain: "ModelDownloader", code: 2, userInfo: [
                     NSLocalizedDescriptionKey: "Файл модели скачался не полностью (\(size) байт)"
@@ -62,7 +65,7 @@ final class ModelDownloader: NSObject, URLSessionDownloadDelegate {
 
             // Проверка целостности: подменённый или битый файл не должен попасть в работу.
             let digest = try ModelDownloader.sha256(of: dest)
-            guard digest == WhisperEngine.modelSHA256 else {
+            guard digest == model.sha256 else {
                 try? fm.removeItem(at: dest)
                 throw NSError(domain: "ModelDownloader", code: 3, userInfo: [
                     NSLocalizedDescriptionKey: "Контрольная сумма модели не совпала — файл удалён, попробуйте скачать снова"

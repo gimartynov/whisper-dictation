@@ -17,6 +17,10 @@ final class AppModel: ObservableObject {
     @Published var needsAccessibility: Bool = false
     @Published var modelMissing: Bool = false
     @Published var downloadProgress: Double?
+    /// id выбранной модели: "turbo" (точнее) или "small" (быстрее на Intel).
+    @Published var selectedModelID: String = ModelCatalog.recommendedID
+
+    var selectedModel: WhisperModel { ModelCatalog.model(id: selectedModelID) }
 
     var onToggleRecord: (() -> Void)?
     var onCopy: (() -> Void)?
@@ -24,4 +28,5 @@ final class AppModel: ObservableObject {
     var onClear: (() -> Void)?
     var onClose: (() -> Void)?
     var onDownloadModel: (() -> Void)?
+    var onSelectModel: ((String) -> Void)?
 }

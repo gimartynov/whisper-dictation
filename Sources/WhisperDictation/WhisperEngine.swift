@@ -3,16 +3,6 @@ import Foundation
 /// Держит локальный whisper-server (whisper.cpp) и шлёт ему WAV на распознавание.
 final class WhisperEngine {
     static let port: UInt16 = 25_400
-    static let modelName = "ggml-large-v3-turbo.bin"
-
-    static let modelURL = URL(string:
-        "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin")!
-
-    /// SHA-256 файла ggml-large-v3-turbo.bin — защита от подмены модели.
-    static let modelSHA256 = "1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69"
-
-    /// Защита от подмены: модель должна быть не меньше этого размера.
-    static let modelMinSize: Int64 = 1_500_000_000
 
     /// Папка приложения в ~/Library/Application Support
     static var supportDir: URL {
@@ -24,12 +14,8 @@ final class WhisperEngine {
         supportDir.appendingPathComponent("models", isDirectory: true)
     }
 
-    static var installedModel: URL {
-        modelsDir.appendingPathComponent(modelName)
-    }
-
     /// Для разработки: путь к уже скачанному файлу модели через переменную
-    /// окружения WD_DEV_MODEL. В обычном запуске не используется.
+    /// окружения WD_DEV_MODEL. В релизной сборке не используется.
     static var devModel: URL? {
         #if DEBUG
         guard let path = ProcessInfo.processInfo.environment["WD_DEV_MODEL"],
@@ -40,16 +26,22 @@ final class WhisperEngine {
         #endif
     }
 
-    /// Первый подходящий путь к модели или nil.
-    static func findModel() -> URL? {
+    /// Путь к скачанной модели по её описанию.
+    static func installedURL(for model: WhisperModel) -> URL? {
         let fm = FileManager.default
-        var candidates = [installedModel]
-        if let dev = devModel { candidates.append(dev) }
-        for candidate in candidates {
-            if let size = try? fm.attributesOfItem(atPath: candidate.path)[.size] as? Int64,
-               size >= Self.modelMinSize {
-                return candidate
-            }
+        let url = modelsDir.appendingPathComponent(model.fileName)
+        guard let size = try? fm.attributesOfItem(atPath: url.path)[.size] as? Int64,
+              size >= model.minSize else { return nil }
+        return url
+    }
+
+    /// Первый подходящий путь к модели или nil.
+    static func findModel(_ model: WhisperModel) -> URL? {
+        if let installed = installedURL(for: model) { return installed }
+        if let dev = devModel, model.id == ModelCatalog.turbo.id,
+           let size = try? FileManager.default.attributesOfItem(atPath: dev.path)[.size] as? Int64,
+           size >= model.minSize {
+            return dev
         }
         return nil
     }
@@ -66,6 +58,8 @@ final class WhisperEngine {
 
     var modelPath: String
     private var process: Process?
+    /// Файл модели, с которым реально запущен текущий процесс.
+    private var startedModelPath = ""
     private(set) var port: UInt16 = WhisperEngine.defaultPort
     static let defaultPort: UInt16 = 25_400
 
@@ -91,7 +85,9 @@ final class WhisperEngine {
     static let threadCount = max(2, min(6, ProcessInfo.processInfo.activeProcessorCount))
 
     func ensureRunning() async -> Bool {
-        if let process, process.isRunning, await ping() { return true }
+        // Модель могли переключить: тогда старый процесс держит не тот файл.
+        if let process, process.isRunning, startedModelPath == modelPath, await ping() { return true }
+        if process?.isRunning == true { shutdown() }
 
         #if arch(x86_64)
         // Intel: Metal-бэкенд whisper.cpp на старых GPU может компилировать
@@ -160,7 +156,10 @@ final class WhisperEngine {
 
         // На Intel загрузка модели может занять больше двух минут.
         for _ in 0..<360 {
-            if await ping() { return true }
+            if await ping() {
+                startedModelPath = modelPath
+                return true
+            }
             if !p.isRunning { return false }
             try? await Task.sleep(nanoseconds: 500_000_000)
         }
@@ -273,6 +272,7 @@ final class WhisperEngine {
     func shutdown() {
         process?.terminate()
         process = nil
+        startedModelPath = ""
     }
 
     deinit {
