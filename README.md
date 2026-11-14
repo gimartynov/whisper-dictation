@@ -67,6 +67,14 @@ The app is signed with a Developer ID certificate and notarized by Apple, so
 the “unidentified developer” warning is gone. The DMG also contains
 `Установить.command`, which copies the app and clears quarantine in one click.
 
+### Microphone
+
+The first recording triggers the system prompt — click **Allow**. If the prompt
+never appears and nothing is transcribed, open **System Settings → Privacy &
+Security → Microphone** and enable **WhisperDictation**, then restart the app.
+The app only appears in that list when it is signed with the audio-input
+entitlement, which the release builds are.
+
 ### Auto-insert permission (Accessibility)
 
 Without this permission the text is recognised and stays in the panel, but it

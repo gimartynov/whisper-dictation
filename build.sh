@@ -57,11 +57,13 @@ if [ -n "$IDENTITY" ]; then
     codesign --force --options runtime --timestamp --sign "$IDENTITY" \
         "$WHISPER_DIR/whisper-server" >/dev/null
     codesign --force --options runtime --timestamp --sign "$IDENTITY" \
-        --identifier com.grigorii.whisperdictation "$APP"
+        --identifier com.grigorii.whisperdictation \
+        --entitlements Resources/WhisperDictation.entitlements "$APP"
 else
     echo "→ Подпись ad-hoc (Developer ID не найден)"
     codesign --force --sign - "$WHISPER_DIR/whisper-server" >/dev/null 2>&1
     codesign --force --deep --sign - --identifier com.grigorii.whisperdictation \
+        --entitlements Resources/WhisperDictation.entitlements \
         --requirements '=designated => identifier "com.grigorii.whisperdictation"' "$APP"
 fi
 
